@@ -1,0 +1,8 @@
+ingress:
+  hosts:
+    - host: prod.hello-world.local
+      paths:
+        - path: /
+          pathType: Prefix
+config:
+  ENV_VALUE: PROD
