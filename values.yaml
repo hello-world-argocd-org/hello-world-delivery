@@ -1,3 +1,4 @@
 springboot-app:
   env:
-   - "SHARED_VALUE=5"
+    - name: SHARED_VALUE
+      value: "5"
