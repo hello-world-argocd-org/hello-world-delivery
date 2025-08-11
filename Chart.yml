@@ -6,5 +6,5 @@ version: 0.1.0
 
 dependencies:
   - name: springboot-app
-    version: 0.1.20
+    version: 0.1.22
     repository: https://hello-world-argocd-org.github.io/base-helm-charts/
