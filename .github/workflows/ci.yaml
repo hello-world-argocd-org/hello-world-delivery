@@ -47,6 +47,11 @@ jobs:
       - name: Install yamllint
         run: sudo apt-get update && sudo apt-get install -y yamllint
 
+      # Optional: install yamllint for better linting feedback
+      - name: Install yq
+        run: sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
+          sudo chmod a+x /usr/local/bin/yq
+
       # Cache Helm dependencies to speed up builds
       - name: Cache Helm dependencies
         uses: actions/cache@v4
