@@ -1,0 +1,10 @@
+apiVersion: v2
+name: hello-world
+description: Delivery chart for the hello-world Spring Boot app (uses the shared springboot-app base)
+type: application
+version: 0.1.0
+
+dependencies:
+  - name: springboot-app
+    version: 0.1.23
+    repository: https://hello-world-argocd-org.github.io/base-helm-charts/

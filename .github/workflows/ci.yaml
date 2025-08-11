@@ -1,0 +1,78 @@
+name: Helm Delivery Chart E2E
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  helm-e2e:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      KIND_VERSION: v0.29.0
+      HELM_VERSION: v3.18.4
+      KUBECONFORM_VERSION: v0.7.0
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Install Helm
+      - name: Install Helm
+        run: |
+          curl -fsSL https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz | tar xz
+          sudo mv linux-amd64/helm /usr/local/bin/helm
+
+      # Install Kind
+      - name: Install Kind
+        run: |
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+
+      # Install kubeconform
+      - name: Install kubeconform
+        run: |
+          curl -L https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz \
+            | tar xz
+          sudo mv kubeconform /usr/local/bin/kubeconform
+
+      # Optional: install yamllint for better linting feedback
+      - name: Install yamllint
+        run: sudo apt-get update && sudo apt-get install -y yamllint
+
+      # Cache Helm dependencies to speed up builds
+      - name: Cache Helm dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            charts/**/charts
+            charts/**/Chart.lock
+          key: helm-${{ hashFiles('**/Chart.yaml', '**/Chart.lock') }}
+
+      - name: Login to GHCR
+        run: echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      # Run all Makefile tests
+      - name: Run Makefile tests
+        run: make all
+
+      # Always show diagnostics if something fails
+      - name: Dump diagnostics on failure
+        if: failure()
+        run: |
+          echo "::group::Pods"
+          kubectl get pods -A -o wide || true
+          echo "::endgroup::"
+          echo "::group::Services"
+          kubectl get svc -A -o wide || true
+          echo "::endgroup::"
+          echo "::group::Deployments"
+          kubectl get deploy -A -o wide || true
+          echo "::endgroup::"
