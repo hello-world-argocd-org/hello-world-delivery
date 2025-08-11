@@ -64,15 +64,45 @@ jobs:
         run: make all
 
       # Always show diagnostics if something fails
-      - name: Dump diagnostics on failure
+      - name: Dump detailed diagnostics on failure
         if: failure()
         run: |
-          echo "::group::Pods"
-          kubectl get pods -A -o wide || true
+          set -euo pipefail
+          echo "::group::Cluster info"
+          kubectl cluster-info || true
+          kubectl version || true
           echo "::endgroup::"
-          echo "::group::Services"
-          kubectl get svc -A -o wide || true
+
+          echo "::group::All resources summary"
+          kubectl get all -A -o wide || true
           echo "::endgroup::"
-          echo "::group::Deployments"
-          kubectl get deploy -A -o wide || true
+
+          echo "::group::Events (sorted)"
+          kubectl get events -A --sort-by=.lastTimestamp || true
           echo "::endgroup::"
+
+          echo "::group::Ingresses"
+          kubectl get ingress -A -o yaml || true
+          echo "::endgroup::"
+
+          echo "::group::Endpoints"
+          kubectl get endpoints -A -o yaml || true
+          echo "::endgroup::"
+
+          echo "::group::Namespace-specific deep diagnostics"
+          for ns in dev stage prod; do
+            echo "---- Namespace: $ns ----"
+            kubectl -n "$ns" get all -o wide || true
+            kubectl -n "$ns" get events --sort-by=.lastTimestamp || true
+            pods=$(kubectl -n "$ns" get pods -o name || true)
+            for pod in $pods; do
+              echo "==== Describing $pod ===="
+              kubectl -n "$ns" describe "$pod" || true
+              echo "==== Logs for $pod ===="
+              kubectl -n "$ns" logs "$pod" --all-containers --timestamps || true
+              echo "==== Previous logs for $pod (if restarted) ===="
+              kubectl -n "$ns" logs "$pod" -p --all-containers --timestamps || true
+            done
+          done
+          echo "::endgroup::"
+
