@@ -1,2 +1,3 @@
-shared:
-  value: 5
+springboot-app:
+  shared:
+    value: 5
