@@ -1,10 +1,11 @@
-image:
-  tag: "0.0.1-SNAPSHOT"
-ingress:
-  hosts:
-    - host: stage.hello-world.local
-      paths:
-        - path: /
-          pathType: Prefix
-config:
-  ENV_VALUE: STAGE
+springboot-app:
+  image:
+    tag: "0.0.1-SNAPSHOT"
+  ingress:
+    hosts:
+      - host: stage.hello-world.local
+        paths:
+          - path: /
+            pathType: Prefix
+  config:
+    ENV_VALUE: STAGE

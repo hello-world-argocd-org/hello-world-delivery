@@ -1,5 +1,4 @@
-# Makefile for hello-world delivery chart testing
-CHART_NAME := hello-world
+CHART_NAME := springboot-app
 KIND_CLUSTER := hw-test
 K8S_VERSION := v1.33.2
 NAMESPACE_DEV := dev
@@ -26,7 +25,7 @@ check-image-tag:
 	    echo "❌ Missing $$file"; \
 	    exit 1; \
 	  fi; \
-	  tag=$$(yq e '.image.tag // ""' "$$file"); \
+	  tag=$$(yq e '.springboot-app.image.tag // ""' "$$file"); \
 	  if [ -z "$$tag" ]; then \
 	    echo "❌ Missing image.tag in $$file"; \
 	    exit 1; \
